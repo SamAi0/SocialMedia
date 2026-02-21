@@ -1,0 +1,380 @@
+/* AR Filters Component Styles */
+.ar-filters-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ar-filters-container {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  background: #121212;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Header */
+.ar-filters-header {
+  padding: 20px;
+  background: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+}
+
+.ar-filters-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Camera Preview */
+.camera-preview {
+  position: relative;
+  flex: 1;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.camera-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.filter-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.recording-indicator {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 0, 0, 0.8);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+}
+
+.recording-dot {
+  width: 12px;
+  height: 12px;
+  background: #ff0000;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Filter Controls */
+.filter-controls {
+  padding: 20px;
+  background: #1a1a1a;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.filter-selector, .sticker-selector {
+  margin-bottom: 25px;
+}
+
+.filter-selector h3, .sticker-selector h3 {
+  color: white;
+  margin: 0 0 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.filter-grid, .sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.filter-option, .sticker-option {
+  background: #2a2a2a;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 15px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-option:hover, .sticker-option:hover {
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.filter-option.active {
+  border-color: #0095f6;
+  background: rgba(0, 149, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.3);
+}
+
+.filter-icon, .sticker-emoji {
+  font-size: 24px;
+}
+
+.filter-name, .sticker-name {
+  color: #ccc;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Applied Stickers */
+.applied-stickers {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.applied-stickers h4 {
+  color: white;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.sticker-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.applied-sticker {
+  background: #333;
+  border-radius: 20px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.remove-sticker {
+  background: none;
+  border: none;
+  color: #ff4757;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-sticker:hover {
+  background: rgba(255, 71, 87, 0.2);
+}
+
+/* Action Buttons */
+.ar-actions {
+  padding: 20px;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.capture-btn, .record-btn {
+  background: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.capture-btn:hover, .record-btn:not(.recording):hover {
+  background: #0081d6;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 149, 246, 0.4);
+}
+
+.record-btn.recording {
+  background: #ff4757;
+  animation: recording-pulse 1s infinite;
+}
+
+@keyframes recording-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+.utility-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.download-btn, .share-btn, .like-btn {
+  background: #2a2a2a;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s;
+}
+
+.download-btn:hover {
+  background: #0095f6;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 149, 246, 0.4);
+}
+
+.share-btn:hover {
+  background: #00d26a;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 210, 106, 0.4);
+}
+
+.like-btn:hover {
+  background: #ff4757;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+}
+
+/* Scrollbar styling */
+.filter-controls::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-controls::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.filter-controls::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+
+.filter-controls::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ar-filters-container {
+    border-radius: 0;
+    max-height: 100vh;
+  }
+  
+  .filter-grid, .sticker-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .filter-option, .sticker-option {
+    padding: 12px 8px;
+  }
+  
+  .filter-icon, .sticker-emoji {
+    font-size: 20px;
+  }
+  
+  .filter-name, .sticker-name {
+    font-size: 11px;
+  }
+  
+  .ar-actions {
+    padding: 15px;
+  }
+  
+  .utility-buttons {
+    gap: 15px;
+  }
+  
+  .download-btn, .share-btn, .like-btn {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-grid, .sticker-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ar-filters-header {
+    padding: 15px;
+  }
+  
+  .filter-controls {
+    padding: 15px;
+  }
+  
+  .capture-btn, .record-btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}

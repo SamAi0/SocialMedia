@@ -1,0 +1,37 @@
+{
+  "name": "social_media_app",
+  "version": "1.0.0",
+  "description": "A full-stack social media application built with React, Node.js, Express, and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "install": "cd backend && npm install && cd ../apk && npm install",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd apk && npm start",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend-only": "cd backend && npm run dev",
+    "frontend-only": "cd apk && npm start"
+  },
+  "keywords": [
+    "social-media",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb",
+    "realtime",
+    "messaging"
+  ],
+  "author": "Social Media App Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/social-media-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/social-media-app/issues"
+  },
+  "homepage": "https://github.com/username/social-media-app#readme"
+}
