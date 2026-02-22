@@ -1,0 +1,233 @@
+.popup-notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+}
+
+.popup-notification {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #eee;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 380px;
+}
+
+.popup-notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  padding: 15px 15px 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-icon-container {
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.like-icon {
+  color: #ff6b6b;
+}
+
+.comment-icon {
+  color: #4ecdc4;
+}
+
+.follow-icon {
+  color: #45b7d1;
+}
+
+.message-icon {
+  color: #96ceb4;
+}
+
+.request-icon {
+  color: #feca57;
+}
+
+.accepted-icon {
+  color: #2ed573;
+}
+
+.declined-icon {
+  color: #ff6b6b;
+}
+
+.notification-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dismiss-button {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.dismiss-button:hover {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.notification-content {
+  padding: 10px 15px;
+}
+
+.notification-message {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.mark-read-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mark-read-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+/* Type-specific styles */
+.like-popup {
+  border-left: 4px solid #ff6b6b;
+}
+
+.comment-popup {
+  border-left: 4px solid #4ecdc4;
+}
+
+.follow-popup {
+  border-left: 4px solid #45b7d1;
+}
+
+.message-popup {
+  border-left: 4px solid #96ceb4;
+}
+
+.message_request-popup {
+  border-left: 4px solid #feca57;
+}
+
+.message_request_accepted-popup,
+.follow_request_accepted-popup {
+  border-left: 4px solid #2ed573;
+}
+
+.message_request_declined-popup {
+  border-left: 4px solid #ff6b6b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .popup-notifications-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .popup-notification {
+    max-width: none;
+  }
+  
+  .notification-header {
+    padding: 12px 12px 8px 12px;
+  }
+  
+  .notification-content {
+    padding: 8px 12px;
+  }
+  
+  .notification-footer {
+    padding: 8px 12px;
+  }
+  
+  .notification-title {
+    font-size: 13px;
+  }
+  
+  .notification-message {
+    font-size: 12px;
+  }
+}
+
+/* Animation for disappearing notifications */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.popup-notification.dismissing {
+  animation: fadeOut 0.3s ease-in forwards;
+}

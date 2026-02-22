@@ -9,14 +9,17 @@ import CreatePostPage from './pages/CreatePost';
 import SearchPage from './pages/SearchPage';
 import SavedPosts from './pages/SavedPosts';
 import NotificationsPage from './pages/NotificationsPage';
+import EnhancedNotificationsPage from './pages/EnhancedNotificationsPage';
 import FollowsPage from './pages/FollowsPage';
 import MessagingPage from './pages/MessagingPage';
+import EnhancedMessaging from './components/EnhancedMessaging';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUserManagement from './pages/AdminUserManagement';
 import AdminContentModeration from './pages/AdminContentModeration';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute'; // We'll create this component
+import AdminRoute from './components/AdminRoute';
 import { NotificationProvider } from './context/NotificationContext';
+import PopupNotifications from './components/PopupNotifications';
 import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import '../node_modules/bootstrap/dist/js/bootstrap.min.js'
@@ -32,6 +35,8 @@ function App() {
           v7_relativeSplatPath: true
         }}
       >
+        <PopupNotifications />
+      
         <div className="app">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -100,7 +105,7 @@ function App() {
               path="/notifications" 
               element={
                 <ProtectedRoute>
-                  <NotificationsPage />
+                  <EnhancedNotificationsPage />
                 </ProtectedRoute>
               } 
             />
@@ -118,7 +123,7 @@ function App() {
               path="/messages" 
               element={
                 <ProtectedRoute>
-                  <MessagingPage />
+                  <EnhancedMessaging />
                 </ProtectedRoute>
               } 
             />

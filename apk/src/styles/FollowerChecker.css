@@ -1,0 +1,303 @@
+.follower-checker {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  margin: 20px 0;
+}
+
+/* Unfollow Alert */
+.unfollow-alert {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.alert-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.alert-icon {
+  color: #856404;
+  flex-shrink: 0;
+}
+
+.alert-message h4 {
+  margin: 0 0 5px 0;
+  color: #856404;
+  font-size: 16px;
+}
+
+.alert-message p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+}
+
+.dismiss-btn {
+  background: #856404;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.dismiss-btn:hover {
+  background: #6d5203;
+  transform: translateY(-1px);
+}
+
+/* Checker Controls */
+.checker-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.check-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-btn:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.check-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.follower-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.follower-count svg {
+  color: #888;
+}
+
+.last-check {
+  color: #888;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* Follower List */
+.follower-list-section h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.follower-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.follower-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.follower-item:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.follower-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.follower-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.follower-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.more-followers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #e9ecef;
+  border-radius: 8px;
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Animations */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .follower-checker {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .checker-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .last-check {
+    margin-left: 0;
+    text-align: center;
+  }
+  
+  .follower-list {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  
+  .follower-item {
+    padding: 10px;
+  }
+  
+  .follower-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .follower-name {
+    font-size: 11px;
+    max-width: 80px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .follower-checker {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #fff;
+  }
+  
+  .unfollow-alert {
+    background: #3a3a1e;
+    border-color: #5a5a2e;
+  }
+  
+  .alert-icon,
+  .alert-message h4,
+  .alert-message p {
+    color: #d4c06a;
+  }
+  
+  .dismiss-btn {
+    background: #d4c06a;
+    color: #000;
+  }
+  
+  .dismiss-btn:hover {
+    background: #b8a552;
+  }
+  
+  .checker-controls {
+    background: #3a3a3a;
+  }
+  
+  .follower-count,
+  .follower-name {
+    color: #ccc;
+  }
+  
+  .follower-count svg {
+    color: #999;
+  }
+  
+  .last-check {
+    color: #999;
+  }
+  
+  .follower-item {
+    background: #3a3a3a;
+  }
+  
+  .follower-item:hover {
+    background: #4a4a4a;
+  }
+  
+  .more-followers {
+    background: #4a4a4a;
+    color: #ccc;
+  }
+}

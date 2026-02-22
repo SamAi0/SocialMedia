@@ -1648,6 +1648,33 @@
 .post-grid-item:hover .post-overlay {
   opacity: 1;
 }
+
+/* Follow Status Section */
+.follow-status-section {
+  margin: 15px 0;
+  width: 100%;
+}
+
+/* Responsive adjustments for follow status */
+@media (max-width: 768px) {
+  .follow-status-section {
+    margin: 10px 0;
+  }
+}
+
+/* Follower Checker Section */
+.follower-checker-section {
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* Responsive adjustments for follower checker */
+@media (max-width: 768px) {
+  .follower-checker-section {
+    margin: 15px 0;
+  }
+}
+
 /* Comment Styles for Profile Page Modal */
 
 .comment-item {

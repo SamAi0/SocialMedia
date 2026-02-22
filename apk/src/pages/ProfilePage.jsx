@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../utils/firebaseConfig';
 import API from '../utils/api';
+import FollowStatusBadge from '../components/FollowStatusBadge';
+import FollowerChecker from '../components/FollowerChecker';
 
 // Default image placeholders
 const DEFAULT_AVATAR = '/assets/default-avatar.svg';
@@ -1924,6 +1926,44 @@ const ProfilePage = () => {
                     </button>
                   </div>
                 </div>
+                
+                {/* Follow Status Badge - Only show for other users */}
+                {user?._id !== localStorage.getItem('userId') && (
+                  <div className="follow-status-section">
+                    <FollowStatusBadge 
+                      userId={localStorage.getItem('userId')}
+                      targetUserId={user?._id}
+                      username={user?.name || user?.username || 'User'}
+                      onFollowChange={(isFollowing) => {
+                        // Refresh user data to update followers count
+                        const currentUserId = localStorage.getItem('userId');
+                        if (currentUserId) {
+                          fetch(`/user/profile/${currentUserId}`)
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.success) {
+                                setUser(data.exist);
+                              }
+                            })
+                            .catch(err => console.error('Error refreshing user data:', err));
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Follower Checker - Only show for own profile */}
+                {user?._id === localStorage.getItem('userId') && (
+                  <div className="follower-checker-section">
+                    <FollowerChecker 
+                      userId={localStorage.getItem('userId')}
+                      onUnfollowDetected={(unfollowedUserIds) => {
+                        console.log('Unfollow detected:', unfollowedUserIds);
+                        // Optional: Show notification or update UI
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="profile-stats">
                   <div className="stat">
                     <span className="stat-count">{posts.length}</span>

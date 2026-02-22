@@ -7,6 +7,7 @@ import { toggleLikeComment, toggleLikePost, getUserLikes } from "../controllers/
 import { getFollow, getFollowing, toggleFollow, getAllFollowRelationships, checkFollowStatus } from "../controllers/FollowController.js";
 import { getNotifications, getNewNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount, deleteNotification, clearAllNotifications, getNotificationStats, createNotification } from "../controllers/NotificationController.js";
 import { DirectMessage, getMessage, sendMessage, getMessagedUsers, addReaction, removeReaction, markMessageAsRead, searchMessages, markMessageAsViewed, reportMessageAsSpam, getUserGroupMessages, createGroupChat } from "../controllers/MessageController.js";
+import { sendMessageRequest, getMessageRequests, acceptMessageRequest, declineMessageRequest, getSentMessageRequests } from "../controllers/MessageRequestController.js";
 import { searchPosts, searchUser } from "../controllers/SearchControllers.js";
 // NEW IMPORTS for Story functionality
 import { createStory, getStoryFeed, markStoryAsViewed, getStoryViews, getHighlights, addToHighlight, removeFromHighlight, deleteHighlight } from "../controllers/StoryController.js";
@@ -129,6 +130,13 @@ route.post("/user/message/:messageId/view", verifyToken, markMessageAsViewed); /
 route.post("/user/message/:messageId/report-spam", verifyToken, reportMessageAsSpam); // Report message as spam
 route.get("/user/group/:groupId/messages", verifyToken, getUserGroupMessages); // Get group messages
 route.post("/user/group/create", verifyToken, createGroupChat); // Create group chat
+
+// NEW: Message Request Routes
+route.post("/user/:senderId/request/:receiverId", verifyToken, sendMessageRequest); // Send message request
+route.get("/user/:userId/message-requests", verifyToken, getMessageRequests); // Get received message requests
+route.get("/user/:userId/sent-message-requests", verifyToken, getSentMessageRequests); // Get sent message requests
+route.post("/message-request/:requestId/accept", verifyToken, acceptMessageRequest); // Accept message request
+route.post("/message-request/:requestId/decline", verifyToken, declineMessageRequest); // Decline message request
 
 
 //search action routes

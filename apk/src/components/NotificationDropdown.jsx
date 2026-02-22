@@ -77,6 +77,10 @@ const NotificationDropdown = ({ userId }) => {
       case 'comment': return '💬';
       case 'follow': return '👤';
       case 'message': return '✉️';
+      case 'message_request': return '.NewRequest';
+      case 'message_request_accepted': return '✅';
+      case 'message_request_declined': return '❌';
+      case 'follow_request_accepted': return '🤝';
       case 'mention': return '@';
       case 'tag': return '🏷️';
       case 'story_reply': return '📸';
@@ -84,6 +88,31 @@ const NotificationDropdown = ({ userId }) => {
       case 'event_reminder': return '📅';
       case 'system': return '📢';
       default: return '🔔';
+    }
+  };
+
+  const getNotificationMessage = (notification) => {
+    const fromUser = notification.fromUser?.name || notification.fromUser?.username || 'Someone';
+    
+    switch (notification.type) {
+      case 'like':
+        return `${fromUser} liked your post`;
+      case 'comment':
+        return `${fromUser} commented on your post`;
+      case 'follow':
+        return `${fromUser} started following you`;
+      case 'message':
+        return `${fromUser}: ${notification.message?.substring(0, 50) || 'sent you a message'}`;
+      case 'message_request':
+        return `${fromUser} wants to message you`;
+      case 'message_request_accepted':
+        return `${fromUser} accepted your message request`;
+      case 'message_request_declined':
+        return `${fromUser} declined your message request`;
+      case 'follow_request_accepted':
+        return `${fromUser} accepted your follow request`;
+      default:
+        return notification.message || 'New notification';
     }
   };
 
@@ -182,7 +211,7 @@ const NotificationDropdown = ({ userId }) => {
                     </div>
                     <div className="notification-text">
                       <p className="notification-message">
-                        {notification.message || 
+                        {getNotificationMessage(notification) || 
                          `${notification.fromUser?.name || 'Someone'} ${notification.type}ed your ${notification.type === 'follow' ? 'profile' : 'post'}`}
                       </p>
                       <p className="notification-time">

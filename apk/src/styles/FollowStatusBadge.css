@@ -1,0 +1,234 @@
+.follow-status-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.follow-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.followers-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.followers-count svg {
+  color: #888;
+}
+
+/* Follow Button Styles */
+.follow-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.follow-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Loading State */
+.follow-btn.loading {
+  background: #f0f0f0;
+  color: #999;
+  cursor: wait;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ddd;
+  border-top: 2px solid #666;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Follow State */
+.follow-btn.follow {
+  background: #007bff;
+  color: white;
+}
+
+.follow-btn.follow:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Following State */
+.follow-btn.following {
+  background: #28a745;
+  color: white;
+}
+
+.follow-btn.following:hover {
+  background: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Self State */
+.follow-status.self {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  color: #6c757d;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Error State */
+.follow-btn.error {
+  background: #dc3545;
+  color: white;
+}
+
+.follow-btn.error:hover {
+  background: #c82333;
+}
+
+/* Message Button */
+.message-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-btn:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Following Indicator */
+.following-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #e8f5e8;
+  border-radius: 20px;
+  border: 1px solid #d4edda;
+  color: #155724;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .follow-status-badge {
+    padding: 12px;
+  }
+  
+  .follow-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .follow-btn {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .followers-count {
+    justify-content: center;
+  }
+  
+  .message-btn {
+    align-self: center;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .follow-status-badge {
+    background: #2d2d2d;
+    border-color: #444;
+  }
+  
+  .followers-count {
+    color: #ccc;
+  }
+  
+  .followers-count svg {
+    color: #999;
+  }
+  
+  .follow-status.self {
+    background: #3a3a3a;
+    color: #aaa;
+  }
+  
+  .message-btn {
+    background: #333;
+    border-color: #555;
+    color: #ccc;
+  }
+  
+  .message-btn:hover {
+    background: #007bff;
+    border-color: #007bff;
+  }
+  
+  .following-indicator {
+    background: #1e3a1e;
+    border-color: #2d5a2d;
+    color: #a8dca8;
+  }
+}
