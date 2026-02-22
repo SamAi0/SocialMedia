@@ -25,6 +25,8 @@ const MessagingPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMediaOptions, setShowMediaOptions] = useState(false);
   const [isVanishingMode, setIsVanishingMode] = useState(false);
+  const [vanishTimer, setVanishTimer] = useState(30); // Default 30 seconds for vanishing messages
+  // eslint-disable-next-line no-unused-vars
   const [showReactions, setShowReactions] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [groupMode, setGroupMode] = useState(false);

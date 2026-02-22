@@ -412,9 +412,8 @@ const Posts = ({ posts: initialPosts, user }) => {
   }, [showComments, postComments]);
 
   // --- LIKE TOGGLE (Synchronized) ---
+  // eslint-disable-next-line no-unused-vars
   const toggleLike = async (e, postId) => {
-    e.preventDefault();
-    e.stopPropagation();
 
     if (!currentUserId) {
       console.error('User ID not found.');
