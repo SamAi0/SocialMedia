@@ -1,6 +1,7 @@
 import messagemodel from "../models/MessageModel.js";
 import { io } from "../server.js"; // Import the io instance
 import usermodel from "../models/UserModel.js";
+import ActivityTrackingService from "../services/ActivityTrackingService.js";
 
 // Helper function to extract mentions from content
 const extractMentions = (content) => {
@@ -139,6 +140,26 @@ export const sendMessage = async (req, res) => {
                 });
             }
         }
+
+        // Log messaging activities
+        await ActivityTrackingService.logMessageActivity(
+            userid, 
+            receiverid, 
+            messagedetails._id, 
+            'message_sent', 
+            `Sent message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+            req
+        );
+
+        // Log for receiver as well
+        await ActivityTrackingService.logMessageActivity(
+            receiverid, 
+            userid, 
+            messagedetails._id, 
+            'message_received', 
+            `Received message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+            req
+        );
 
         // Return the created message with its ID for client-side handling
         res.status(200).send({
@@ -301,6 +322,16 @@ export const markMessageAsRead = async (req, res) => {
             });
         }
 
+        // Log message read activity
+        await ActivityTrackingService.logMessageActivity(
+            req.user.userId, 
+            message.sender.toString(), 
+            messageId, 
+            'message_read', 
+            'Message marked as read',
+            req
+        );
+
         res.status(200).send({
             success: true,
             message: 'Message marked as read'
@@ -425,7 +456,7 @@ export const DirectMessage = async (req, res) => {
         const incomingMessages = await messagemodel.find({
             receiver: userid,
             sender: senderid
-        }).populate('sender', 'name avatar');
+        }).populate('sender', 'name avatar username').populate('receiver', 'name avatar username');
 
         console.log(`Found ${incomingMessages.length} incoming messages`);
 
@@ -433,7 +464,7 @@ export const DirectMessage = async (req, res) => {
         const outgoingMessages = await messagemodel.find({
             receiver: senderid,
             sender: userid
-        }).populate('sender', 'name avatar');
+        }).populate('sender', 'name avatar username').populate('receiver', 'name avatar username');
 
         console.log(`Found ${outgoingMessages.length} outgoing messages`);
 

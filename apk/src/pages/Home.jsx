@@ -17,7 +17,7 @@ function Home() {
   const [suggestions, setSuggestions] = useState([]); 
   const navigate = useNavigate();
 
-  const authHeaders = (token) => ({ Authorization: `Bearer ${token}` });
+  const authHeaders = useCallback((token) => ({ Authorization: `Bearer ${token}` }), []);
 
   // --- FUNCTION: Fetch & Process Suggestions (Real Data) ---
   const fetchSuggestions = useCallback(async (userId, token) => {

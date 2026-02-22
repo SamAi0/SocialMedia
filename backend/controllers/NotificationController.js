@@ -93,9 +93,33 @@ export const getNewNotifications = async (req, res) => {
             });
         }
         
+        // Handle both date strings and notification IDs
+        let dateQuery;
+        
+        // Check if since is a valid date string
+        const sinceDate = new Date(since);
+        if (sinceDate.toString() !== 'Invalid Date') {
+            // It's a date string
+            dateQuery = { $gt: sinceDate };
+        } else {
+            // It's likely a notification ID, get the date of that notification
+            try {
+                const sinceNotification = await NotificationModel.findById(since);
+                if (sinceNotification) {
+                    dateQuery = { $gt: sinceNotification.date };
+                } else {
+                    // If notification not found, use current time
+                    dateQuery = { $gt: new Date() };
+                }
+            } catch (error) {
+                // If there's an error parsing as ID, use current time
+                dateQuery = { $gt: new Date() };
+            }
+        }
+        
         const query = { 
             user: userId,
-            date: { $gt: new Date(since) }
+            date: dateQuery
         };
         
         const newNotifications = await NotificationModel.find(query)
@@ -107,7 +131,7 @@ export const getNewNotifications = async (req, res) => {
         const newCount = await NotificationModel.countDocuments({
             user: userId,
             isRead: false,
-            date: { $gt: new Date(since) }
+            date: dateQuery
         });
         
         res.status(200).json({

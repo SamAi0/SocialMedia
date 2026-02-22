@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Instagram, Home, Compass, MessageCircle, Heart, PlusSquare, Menu, LogOut, User, Search, Settings } from 'lucide-react';
 // import axios from 'axios'; // Unused import
 import CreatePost from './CreatePost';
-import { useTheme } from '../context/ThemeContext';
+// import { useTheme } from '../context/ThemeContext'; // Unused import
 import API from '../utils/api';
 
 const Sidebar = ({ user: propUser }) => {
@@ -267,9 +267,9 @@ const Sidebar = ({ user: propUser }) => {
     setShowCreateModal(false);
   };
 
-  const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
-  };
+  // const toggleSidebar = () => {
+  //   setIsExpanded(!isExpanded);
+  // };
 
   const handleMouseEnter = () => {
     setIsExpanded(true);

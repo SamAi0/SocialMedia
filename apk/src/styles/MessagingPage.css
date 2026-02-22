@@ -273,6 +273,36 @@
   flex-shrink: 0;
 }
 
+.contact-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.contact-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-name {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .contact-info {
   display: flex;
   align-items: center;
@@ -391,6 +421,21 @@
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* Message identifier */
+.message-identifier {
+  font-size: 10px;
+  margin-bottom: 2px;
+  font-weight: bold;
+}
+
+.message-identifier .sent-by {
+  color: #ffffff;
+}
+
+.message-identifier .received-from {
+  color: var(--accent-color);
 }
 
 /* Message metadata */
@@ -604,6 +649,28 @@
 
 .messages-container::-webkit-scrollbar-thumb:hover {
   background: var(--text-primary);
+}
+
+/* Activity Tracker Overlay */
+.activity-tracker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.activity-tracker-overlay .user-activity-tracker {
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 /* Mobile enhancements */

@@ -5,6 +5,7 @@ import CookieParser from "cookie-parser";
 import route from "./routes/UserRoutes.js";
 import notificationRoutes from "./routes/NotificationRoutes.js";
 import adminRoutes from "./routes/AdminRoutes.js";
+import activityRoutes from "./routes/ActivityRoutes.js";
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -390,6 +391,7 @@ app.use((req, res, next) => {
 
 app.use(route)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api', activityRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/uploads', express.static(uploadsDir))
 

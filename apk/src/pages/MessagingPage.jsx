@@ -4,10 +4,12 @@ import io from 'socket.io-client';
 import Sidebar from '../components/Sidebar';
 import { 
   Send, User, Phone, Video, MoreVertical, Smile, 
-  Camera, Reply, MessageSquare, Settings, Users, Eye, EyeOff
+  Camera, Reply, MessageSquare, Settings, Users, Eye, EyeOff, Activity
 } from 'lucide-react';
 import '../styles/MessagingPage.css';
+import '../styles/UserActivityTracker.css';
 import API from '../utils/api';
+import UserActivityTracker from '../components/UserActivityTracker';
 
 const MessagingPage = () => {
   const location = useLocation();
@@ -25,12 +27,12 @@ const MessagingPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMediaOptions, setShowMediaOptions] = useState(false);
   const [isVanishingMode, setIsVanishingMode] = useState(false);
-  const [vanishTimer, setVanishTimer] = useState(30); // Default 30 seconds for vanishing messages
   // eslint-disable-next-line no-unused-vars
   const [showReactions, setShowReactions] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [groupMode, setGroupMode] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [showActivityTracker, setShowActivityTracker] = useState(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -77,10 +79,15 @@ const MessagingPage = () => {
       
       // Add to messages if it's from the current chat
       if (selectedContact && (
-        (data.senderId === selectedContact._id) || 
+        // Check if it's a direct message between current user and selected contact
+        ((data.senderId === selectedContact._id && data.receiverId === userId) ||
+         (data.senderId === userId && data.receiverId === selectedContact._id)) ||
+        // Or if it's a group message
         (data.groupId && groupMode && data.groupId === selectedContact._id)
       )) {
-        setMessages(prev => [...prev, data.message]);
+        // Ensure the incoming message has proper sender information
+        const messageWithSenderInfo = data.message;
+        setMessages(prev => [...prev, messageWithSenderInfo]);
       }
     });
 
@@ -293,16 +300,8 @@ const MessagingPage = () => {
           const fetchedMessages = response.data.messagedetails;
           console.log(`Loaded ${fetchedMessages.length} messages:`, fetchedMessages);
           
-          // Format messages to ensure proper display
-          const formattedMessages = fetchedMessages.map(message => ({
-            _id: message._id,
-            sender: message.sender,
-            receiver: message.receiver,
-            content: message.content,
-            timestamp: message.timestamp
-          }));
-          
-          setMessages(formattedMessages);
+          // Format messages to ensure proper display - preserve all message properties
+          setMessages(fetchedMessages);
         } else {
           console.warn('No messages found or unexpected response format:', response.data);
           setMessages([]);
@@ -334,32 +333,7 @@ const MessagingPage = () => {
     }, 100);
   };
 
-  const handleInputChange = (e) => {
-    setNewMessage(e.target.value);
 
-    if (!socket || !selectedContact) return;
-
-    // Clear previous timeout
-    if (typingTimeout) clearTimeout(typingTimeout);
-
-    // Send typing indicator
-    socket.emit('typing', {
-      senderId: user?._id,
-      receiverId: selectedContact._id,
-      isTyping: true
-    });
-
-    // Set timeout to stop typing indicator
-    const timeout = setTimeout(() => {
-      socket.emit('typing', {
-        senderId: user?._id,
-        receiverId: selectedContact._id,
-        isTyping: false
-      });
-    }, 2000);
-
-    setTypingTimeout(timeout);
-  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -386,7 +360,7 @@ const MessagingPage = () => {
         reactions: [],
         read: false,
         isVanishing: isVanishingMode,
-        vanishAfterSeconds: vanishTimer
+        vanishAfterSeconds: isVanishingMode ? 30 : 0
       };
 
       // Optimistically update UI
@@ -420,14 +394,8 @@ const MessagingPage = () => {
           prevMessages.map(msg => 
             // If this is our optimistic message, replace it with the real one
             msg._id === tempId ? {
-              _id: savedMessage._id,
-              sender: savedMessage.sender,
-              receiver: savedMessage.receiver,
-              content: savedMessage.content,
-              timestamp: savedMessage.timestamp,
-              reactions: savedMessage.reactions || [],
-              read: savedMessage.read,
-              isVanishing: savedMessage.isVanishing,
+              ...savedMessage,
+              isOptimistic: false
             } : msg
           )
         );
@@ -508,12 +476,7 @@ const MessagingPage = () => {
     });
   };
 
-  // Function to navigate to user profile
-  const navigateToProfile = () => {
-    if (selectedContact && selectedContact._id) {
-      navigate(`/profile/${selectedContact._id}`);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -628,15 +591,15 @@ const MessagingPage = () => {
           <div className="chat-container">
             <div className="chat-header">
               <div className="contact-info">
-                <div className="contact-avatar">
+                <div className="contact-avatar-large">
                   {selectedContact.avatar ? (
                     <img src={selectedContact.avatar} alt={selectedContact.name} />
                   ) : (
-                    <User size={16} />
+                    <User size={32} />
                   )}
                 </div>
-                <div>
-                  <h3>{selectedContact.name}</h3>
+                <div className="contact-details">
+                  <h3 className="contact-name">{selectedContact.name}</h3>
                   <span className="online-status">Online</span>
                 </div>
               </div>
@@ -647,6 +610,13 @@ const MessagingPage = () => {
                 </button>
                 <button className="icon-button" title="Video call">
                   <Video size={20} />
+                </button>
+                <button 
+                  className={`icon-button ${showActivityTracker ? 'active' : ''}`} 
+                  onClick={() => setShowActivityTracker(!showActivityTracker)}
+                  title="Activity Tracker"
+                >
+                  <Activity size={20} />
                 </button>
                 <button className="icon-button" title="More options">
                   <MoreVertical size={20} />
@@ -661,6 +631,9 @@ const MessagingPage = () => {
                   const isSent = message.sender === userId;
                   const isMentioned = message.mentions?.some(m => m.userId === userId);
                   
+                  // Get sender name for the message
+                  const senderName = isSent ? 'You' : (message.sender?.name || message.sender?.username || 'User');
+                  
                   return (
                     <div
                       key={message._id}
@@ -670,6 +643,7 @@ const MessagingPage = () => {
                         setSelectedMessage(message);
                         setShowReactions(true);
                       }}
+                      title={`${senderName} sent this message at ${new Date(message.timestamp).toLocaleTimeString()}`}
                     >
                       {/* Reply indicator */}
                       {message.repliedTo && (
@@ -681,6 +655,12 @@ const MessagingPage = () => {
                       
                       {/* Message content */}
                       <div className="message-content">
+                        {/* Show sender name for both sent and received messages */}
+                        <div className="message-identifier">
+                          <span className={isSent ? 'sent-by' : 'received-from'}>
+                            {senderName}
+                          </span>
+                        </div>
                         {message.content}
                         {message.mediaUrl && (
                           <div className="message-media">
@@ -841,6 +821,16 @@ const MessagingPage = () => {
                     {emoji}
                   </button>
                 ))}
+              </div>
+            )}
+            
+            {/* Activity Tracker */}
+            {showActivityTracker && selectedContact && (
+              <div className="activity-tracker-overlay">
+                <UserActivityTracker 
+                  userId={user?._id} 
+                  targetUserId={selectedContact._id}
+                />
               </div>
             )}
           </div>
