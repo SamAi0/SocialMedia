@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Plus, X, ChevronLeft, ChevronRight, Send, Heart, MessageCircle, Upload } from 'lucide-react';
 import '../styles/Story.css';
 import { useNavigate } from 'react-router-dom';
-import { uploadMediaToFirebase } from '../utils/MediaUploadService'; 
+import { uploadMediaToCloudinary } from '../utils/MediaUploadService'; 
 
 // Default image placeholders
 const DEFAULT_AVATAR = '/assets/default-avatar.svg';
@@ -255,15 +255,16 @@ const StoriesPage = () => {
         let uploadedMediaUrl = null;
         
         try {
-            // 2. Upload file to Firebase Storage
-            uploadedMediaUrl = await uploadMediaToFirebase(
+            // 2. Upload file to Cloudinary
+            uploadedMediaUrl = await uploadMediaToCloudinary(
                 storyFile, 
                 'stories', 
-                setUploadProgress
+                setUploadProgress,
+                'storyMedia'
             ); 
             
             if (!uploadedMediaUrl) {
-                throw new Error("Firebase upload failed or returned an empty URL.");
+                throw new Error("Cloudinary upload failed or returned an empty URL.");
             }
 
             // 3. Post story metadata to the backend

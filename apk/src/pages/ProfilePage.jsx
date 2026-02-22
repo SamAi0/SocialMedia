@@ -4,8 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { Settings, Grid, Bookmark, X, Upload, Heart, MessageCircle, Image, Edit, Trash2, MoreHorizontal, Video, Film, Share2, BookmarkCheck, Send } from 'lucide-react';
 import '../styles/ProfilePage.css';
 import { useNavigate } from 'react-router-dom';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../utils/firebaseConfig';
+import { uploadMediaToCloudinary } from '../utils/MediaUploadService';
 import API from '../utils/api';
 import FollowStatusBadge from '../components/FollowStatusBadge';
 import FollowerChecker from '../components/FollowerChecker';
@@ -90,7 +89,7 @@ const ProfilePage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [showPostModal, setShowPostModal] = useState(false);
-  const [showPostOptions, setShowPostOptions] = useState(false);
+  // const [showPostOptions, setShowPostOptions] = useState(false); // eslint-disable-line no-unused-vars
   const [editPostMode, setEditPostMode] = useState(false);
   const [editedCaption, setEditedCaption] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -740,29 +739,7 @@ const ProfilePage = () => {
     }
   };
 
-  // Check if Firebase is properly initialized
-  useEffect(() => {
-    // Try to verify Firebase storage is accessible
-    try {
-      if (storage) {
-        console.log('Firebase storage initialized successfully');
-        
-        // Test creating a reference to verify the storage connection
-        try {
-          const testRef = ref(storage, 'test');
-          console.log('Test storage reference created successfully:', testRef);
-        } catch (refError) {
-          console.error('Error creating test storage reference:', refError);
-          alert('Warning: Media uploads may not work properly. Please check your internet connection.');
-        }
-      } else {
-        console.warn('Firebase storage not available or not initialized');
-        // Don't show an alert here as it might be disruptive on initial load
-      }
-    } catch (error) {
-      console.error('Error checking Firebase storage:', error);
-    }
-  }, []);
+  // Removed Firebase initialization check - using Cloudinary instead
 
   const handleOpenEditModal = () => {
     // Initialize form data with current user data
@@ -811,15 +788,83 @@ const ProfilePage = () => {
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('accessToken');
       
-      // First update basic profile info without avatar
-      const updateData = {
+      // Prepare profile update data
+      let updateData = {
         name: formData.name,
         bio: formData.bio
       };
       
+      // If we have a new avatar file, upload it to Cloudinary first
+      let newAvatarUrl = user?.avatar || '';
+      
+      // Handle avatar upload separately to avoid large payloads
+      if (formData.avatar && formData.avatar instanceof File) {
+        try {
+          // First, try to upload using Cloudinary
+          console.log('Attempting Cloudinary upload for avatar:', formData.avatar.name);
+                
+          const downloadURL = await uploadMediaToCloudinary(formData.avatar, 'avatars', (progress) => {
+            console.log('Avatar upload progress:', progress);
+          });
+                
+          console.log('Avatar uploaded successfully to Cloudinary, URL:', downloadURL);
+                
+          // Add avatar URL to update data
+          updateData.avatar = downloadURL;
+          newAvatarUrl = downloadURL;
+        } catch (cloudinaryError) {
+          console.error('Cloudinary upload failed, using backend upload service:', cloudinaryError);
+                
+          // Fallback to backend upload service
+          try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+              throw new Error('User not authenticated');
+            }
+                  
+            const formDataUpload = new FormData();
+            formDataUpload.append('avatar', formData.avatar);
+                  
+            const response = await fetch('http://localhost:5000/api/upload', {
+              method: 'POST',
+              body: formDataUpload,
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+                  
+            const data = await response.json();
+                  
+            if (data.success && data.filePath) {
+              // Use the file path returned by backend
+              updateData.avatar = data.filePath;
+              newAvatarUrl = data.filePath;
+              console.log('Avatar uploaded successfully via backend:', data.filePath);
+            } else {
+              console.error('Backend upload failed:', data.message);
+              // Final fallback to base64 if both methods fail
+              throw new Error('Both Cloudinary and backend uploads failed');
+            }
+          } catch (backendError) {
+            console.error('Backend upload also failed, using base64 fallback:', backendError);
+            // Final fallback to base64 if all other methods fail
+            const reader = new FileReader();
+            reader.onload = () => {
+              updateData.avatar = reader.result;
+              newAvatarUrl = reader.result;
+            };
+            reader.onerror = (readerError) => {
+              console.error('Error reading avatar file:', readerError);
+              throw readerError;
+            };
+            reader.readAsDataURL(formData.avatar);
+          }
+        }
+      }
+      
       console.log('Updating profile data:', updateData);
       
-      // Update basic profile information
+      // Update profile information with all data
       const profileResponse = await API({
         method: 'patch',
         url: `/user/update/${userId}`,
@@ -831,66 +876,7 @@ const ProfilePage = () => {
       
       console.log('Profile update response:', profileResponse.data);
 
-      // If we have a new avatar file, upload it to Firebase
-      let newAvatarUrl = user?.avatar || '';
-      
-      if (formData.avatar && formData.avatar instanceof File) {
-        try {
-          console.log('Uploading new avatar file to Firebase:', formData.avatar.name);
-          
-          // Create a unique filename for the avatar
-          const safeFileName = formData.avatar.name.replace(/[^a-zA-Z0-9.]/g, '_');
-          const fileName = `avatars/${userId}_${Date.now()}_${safeFileName}`;
-          
-          // Create Firebase storage reference
-          const storageRef = ref(storage, fileName);
-          
-          // Upload file to Firebase
-          const uploadTask = uploadBytesResumable(storageRef, formData.avatar);
-          
-          // Handle upload progress and completion
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log('Avatar upload progress:', progress);
-            },
-            (error) => {
-              console.error('Error uploading avatar to Firebase:', error);
-              throw error;
-            }
-          );
-          
-          // Wait for upload to complete
-          await uploadTask;
-          
-          // Get the download URL
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('Avatar uploaded successfully, URL:', downloadURL);
-          
-          // Update user profile with the Firebase URL
-          const avatarUpdateResponse = await API({
-            method: 'patch',
-            url: `/user/update/${userId}`,
-            data: { avatar: downloadURL },
-            headers: { 
-              Authorization: `Bearer ${token}`
-            }
-          });
-          
-          console.log('Avatar update response:', avatarUpdateResponse.data);
-          
-          if (avatarUpdateResponse.data && avatarUpdateResponse.data.success) {
-            newAvatarUrl = downloadURL;
-          }
-        } catch (avatarError) {
-          console.error('Error uploading avatar to Firebase:', avatarError);
-          if (avatarError.response) {
-            console.error('Error response:', avatarError.response.data);
-          }
-          alert('Profile updated but avatar upload failed. Please try again later.');
-        }
-      }
+
       
       // If basic profile update was successful
       if (profileResponse.data && profileResponse.data.success) {
@@ -940,7 +926,6 @@ const ProfilePage = () => {
     setShowPostModal(true);
     setEditPostMode(false);
     setEditedCaption(post.text || '');
-    setShowPostOptions(false);
     setShowDeleteConfirm(false);
   };
 
@@ -965,7 +950,6 @@ const ProfilePage = () => {
       setEditedCaption(selectedPost?.text || '');
     }
     setEditPostMode(!editPostMode);
-    setShowPostOptions(false);
   };
 
   // Handle caption change
@@ -1414,7 +1398,6 @@ const ProfilePage = () => {
   // Toggle delete confirmation
   const toggleDeleteConfirm = () => {
     setShowDeleteConfirm(!showDeleteConfirm);
-    setShowPostOptions(false);
   };
 
   // Delete post
@@ -1592,89 +1575,32 @@ const ProfilePage = () => {
     }
   };
 
-  // Upload file to Firebase and update post
-  const uploadFileToFirebase = async (file, postId) => {
-    return new Promise((resolve, reject) => {
-      try {
-        // Check if Firebase is available
-        if (!storage) {
-          const error = new Error('Firebase storage not available');
-          console.error(error);
-          alert('Media upload service is currently unavailable. Please try again later.');
-          reject(error);
-          return;
-        }
-
-        // Check if file is valid
-        if (!file || !file.name) {
-          const error = new Error('Invalid file object');
-          console.error('Invalid file object', file);
-          alert('Invalid file selected. Please try again with a different file.');
-          reject(error);
-          return;
-        }
-
-        // Create a simple path to avoid path resolution issues
-        const safeFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-        const fileName = `posts/${Date.now()}_${safeFileName}`;
-        
-        console.log('Creating storage reference for path:', fileName);
-        try {
-          const storageRef = ref(storage, fileName);
-          
-          console.log('Starting upload task');
-          const uploadTask = uploadBytesResumable(storageRef, file);
-          
-          // Monitor upload progress
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log('Upload progress:', progress);
-              setUploadProgress(progress);
-            },
-            (error) => {
-              console.error('Error during upload:', error);
-              // Show user-friendly error
-              switch (error.code) {
-                case 'storage/unauthorized':
-                  alert('You don\'t have permission to upload files.');
-                  break;
-                case 'storage/canceled':
-                  alert('Upload was canceled.');
-                  break;
-                case 'storage/unknown':
-                default:
-                  alert('An error occurred during upload. Please try again.');
-                  break;
-              }
-              reject(error);
-            },
-            async () => {
-              try {
-                // Get download URL after upload completes
-                console.log('Upload completed, getting download URL');
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                console.log('File uploaded successfully, URL:', downloadURL);
-                resolve(downloadURL);
-              } catch (urlError) {
-                console.error('Error getting download URL:', urlError);
-                alert('File uploaded but unable to get download URL. Please try again.');
-                reject(urlError);
-              }
-            }
-          );
-        } catch (refError) {
-          console.error('Error creating storage reference:', refError);
-          alert('Failed to initialize upload. Please try again later.');
-          reject(refError);
-        }
-      } catch (error) {
-        console.error('Error initiating upload:', error);
-        alert('Failed to start upload. Please try again.');
-        reject(error);
+  // Upload file to Cloudinary and update post
+  const uploadFileToCloudinary = async (file, postId) => {
+    try {
+      // Check if file is valid
+      if (!file || !file.name) {
+        const error = new Error('Invalid file object');
+        console.error('Invalid file object', file);
+        alert('Invalid file selected. Please try again with a different file.');
+        throw error;
       }
-    });
+      
+      const folder = 'posts';
+      
+      console.log('Starting upload to Cloudinary for file:', file.name);
+      
+      const downloadURL = await uploadMediaToCloudinary(file, folder, (progress) => {
+        setUploadProgress(progress);
+      });
+      
+      console.log('File uploaded successfully to Cloudinary, URL:', downloadURL);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error during Cloudinary upload:', error);
+      alert('An error occurred during upload. Please try again.');
+      throw error;
+    }
   };
 
   // Enhanced save edited post function
@@ -1706,15 +1632,15 @@ const ProfilePage = () => {
           
           console.log('Preparing to upload file:', newFileUpload.name, 'type:', newFileUpload.type);
           
-          // Try uploading to Firebase first
+          // Try uploading to Cloudinary first
           try {
-            updatedMediaUrl = await uploadFileToFirebase(newFileUpload, selectedPost._id);
+            updatedMediaUrl = await uploadFileToCloudinary(newFileUpload, selectedPost._id);
             mediaType = uploadType;
             // Update postType based on media type
             postType = mediaType === 'video' ? 'reel' : 'post';
-            console.log('Media uploaded successfully to Firebase:', updatedMediaUrl);
-          } catch (firebaseError) {
-            console.error('Firebase upload failed, trying fallback upload method:', firebaseError);
+            console.log('Media uploaded successfully to Cloudinary:', updatedMediaUrl);
+          } catch (cloudinaryError) {
+            console.error('Cloudinary upload failed, trying fallback upload method:', cloudinaryError);
             
             // Fallback: Upload through backend API
             try {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+// import axios from 'axios'; // eslint-disable-line no-unused-vars
 import { Plus, X, ChevronLeft, ChevronRight, Send, Heart, Upload, Eye, Clock, Users, Sparkles, Layout, Calendar } from 'lucide-react';
 import '../styles/Story.css';
 import { useNavigate } from 'react-router-dom';
-import { uploadMediaToFirebase } from '../utils/MediaUploadService';
+import { uploadMediaToCloudinary } from '../utils/MediaUploadService';
 import API from '../utils/api';
 import StoryTemplates from './StoryTemplates';
 import StoryLayoutEditor from './StoryLayoutEditor';
@@ -34,6 +34,9 @@ const Story = () => {
     const [scheduledTime, setScheduledTime] = useState(null);
     const [showViews, setShowViews] = useState(false);
     const [storyViewers, setStoryViewers] = useState([]);
+    
+    // Note: selectedTemplate is used for story template functionality
+    // but may not be directly rendered in JSX
     
     const fileInputRef = useRef(null);
     const progressIntervalRef = useRef(null);
@@ -127,6 +130,7 @@ const Story = () => {
                 URL.revokeObjectURL(storyPreview);
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchData]);
 
     const markStoryAsViewedAPI = async (storyId) => {
@@ -215,6 +219,7 @@ const Story = () => {
                 clearTimeout(storyTimeoutRef.current);
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewingStory, activeStoryIndex, currentUser, fetchStoryViewers]);
 
     const handleViewStory = (userIndex, storyStartIndex = 0) => {
@@ -363,10 +368,11 @@ const Story = () => {
         setUploadProgress(0);
         
         try {
-            const uploadedMediaUrl = await uploadMediaToFirebase(
+            const uploadedMediaUrl = await uploadMediaToCloudinary(
                 storyFile, 
                 'stories', 
-                setUploadProgress
+                setUploadProgress,
+                'storyMedia'
             );
             
             if (!uploadedMediaUrl) {

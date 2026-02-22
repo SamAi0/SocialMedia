@@ -26,7 +26,11 @@ export const verifyToken = async (req, res, next) => {
             }
             
             // Store decoded user info in request object for later use
-            req.user = decoded;
+            // Map the id from token to _id for consistency
+            req.user = {
+                _id: decoded.id,
+                id: decoded.id
+            };
             next();
         });
     } catch (error) {

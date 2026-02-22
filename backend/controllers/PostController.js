@@ -13,7 +13,7 @@ import { generateObjectId } from '../utils/ObjectIdGenerator.js';
 export const createPost = async (req, res) => {
     try {
         const { userid } = req.params
-        const { text, image, video, postType } = req.body
+        const { text, image, video, postType, aspectRatio, duration } = req.body
 
         // Check if we're using mock database
         if (process.env.USE_MOCK_DB === 'true') {
@@ -25,6 +25,8 @@ export const createPost = async (req, res) => {
                 image: image,
                 video: video,
                 postType: postType || (video ? 'reel' : 'post'),
+                aspectRatio: aspectRatio || '4:5',
+                duration: duration,
                 date: new Date(),
                 likes: []
             };
@@ -39,7 +41,9 @@ export const createPost = async (req, res) => {
                 text: text,
                 image: image,
                 video: video,
-                postType: postType || (video ? 'reel' : 'post') // Default based on content if not specified
+                postType: postType || (video ? 'reel' : 'post'), // Default based on content if not specified
+                aspectRatio: aspectRatio || '4:5',
+                duration: duration
             })
             await post.save()
 
@@ -71,7 +75,8 @@ export const createPost = async (req, res) => {
         }
     }
     catch (error) {
-        res.status(200).send({ message: "Failed to update post", success: false })
+        console.error("Error creating post:", error);
+        res.status(500).send({ message: "Internal Server Error", success: false })
     }
 }
 
@@ -123,12 +128,15 @@ export const getOnePost = async (req, res) => {
 export const updatePost = async (req, res) => {
     try {
         const { postid } = req.params;
-        const { text, video, image } = req.body
+        const { text, video, image, postType, aspectRatio, duration } = req.body
         const updateFields = {};
 
         if (text !== undefined) updateFields.text = text;
         if (video !== undefined) updateFields.video = video;
         if (image !== undefined) updateFields.image = image;
+        if (postType !== undefined) updateFields.postType = postType;
+        if (aspectRatio !== undefined) updateFields.aspectRatio = aspectRatio;
+        if (duration !== undefined) updateFields.duration = duration;
 
         const updatedetails = await postmodel.findByIdAndUpdate(
             postid,
@@ -149,7 +157,7 @@ export const updatePost = async (req, res) => {
     }
     catch (error) {
         console.error("Error updating post:", error);
-        res.status(500).send({ message: "Something went wrong", success: false })
+        res.status(500).send({ message: "Internal Server Error", success: false })
     }
 }
 

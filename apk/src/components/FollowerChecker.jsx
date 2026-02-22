@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Users, RefreshCw, AlertTriangle } from 'lucide-react';
 import API from '../utils/api';
 import '../styles/FollowerChecker.css';
@@ -11,38 +11,8 @@ const FollowerChecker = ({ userId, onUnfollowDetected }) => {
   const [lastCheckTime, setLastCheckTime] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
 
-  // Load initial followers list
-  useEffect(() => {
-    if (userId) {
-      loadFollowers();
-    }
-  }, [userId]);
-
-  // Periodic checking (every 5 minutes)
-  useEffect(() => {
-    if (!userId) return;
-    
-    const interval = setInterval(() => {
-      checkForUnfollows();
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [userId, followers]);
-
-  const loadFollowers = async () => {
-    try {
-      const response = await API.get(`/user/${userId}/followers`);
-      if (response.data.success) {
-        const followerIds = response.data.followdetails.map(f => f.follower?._id || f.follower);
-        setFollowers(followerIds);
-        setPreviousFollowers(followerIds);
-      }
-    } catch (error) {
-      console.error('Error loading followers:', error);
-    }
-  };
-
-  const checkForUnfollows = async () => {
+  // Define checkForUnfollows before using it in useEffect
+  const checkForUnfollows = useCallback(async () => {
     if (checking) return;
     
     setChecking(true);
@@ -76,6 +46,39 @@ const FollowerChecker = ({ userId, onUnfollowDetected }) => {
       console.error('Error checking for unfollows:', error);
     } finally {
       setChecking(false);
+    }
+  }, [checking, previousFollowers, userId]);
+
+  // Load initial followers list
+  useEffect(() => {
+    if (userId) {
+      loadFollowers();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  // Periodic checking (every 5 minutes)
+  useEffect(() => {
+    if (!userId) return;
+    
+    const interval = setInterval(() => {
+      checkForUnfollows();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, checkForUnfollows]);
+
+  const loadFollowers = async () => {
+    try {
+      const response = await API.get(`/user/${userId}/followers`);
+      if (response.data.success) {
+        const followerIds = response.data.followdetails.map(f => f.follower?._id || f.follower);
+        setFollowers(followerIds);
+        setPreviousFollowers(followerIds);
+      }
+    } catch (error) {
+      console.error('Error loading followers:', error);
     }
   };
 

@@ -22,10 +22,15 @@ import jwt from 'jsonwebtoken';
 import notificationmodel from "./models/NotificationModel.js";
 
 dotenv.config()
+
+// Connect to database
+await db; // Wait for the database connection Promise to resolve
+
 const app = express()
 app.use(cors())
 app.use(CookieParser())
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 // Configure multer for handling file uploads
 const __filename = fileURLToPath(import.meta.url)
@@ -54,11 +59,18 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
   fileFilter: function (req, file, cb) {
-    // Accept images and videos only
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|mp4|webm|mov)$/)) {
-      return cb(new Error('Only image and video files are allowed!'), false)
+    // Check file extension
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|mp4|webm|mov)$/i)) {
+      return cb(new Error('Only image and video files are allowed!'), false);
     }
-    cb(null, true)
+    
+    // Also check MIME type for additional security
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return cb(new Error('File type not allowed!'), false);
+    }
+    
+    cb(null, true);
   }
 })
 
@@ -100,7 +112,13 @@ io.use(async (socket, next) => {
     next();
   } catch (error) {
     console.error('Socket authentication error:', error.message);
-    next(new Error('Authentication error: Invalid token'));
+    if (error.name === 'JsonWebTokenError') {
+      return next(new Error('Authentication error: Invalid token format'));
+    } else if (error.name === 'TokenExpiredError') {
+      return next(new Error('Authentication error: Token expired'));
+    } else {
+      return next(new Error('Authentication error: Invalid token'));
+    }
   }
 });
 
@@ -130,6 +148,18 @@ io.on("connection", (socket) => {
   socket.on("send_message", async (messageData) => {
     try {
       const { senderId, receiverId, content, _id } = messageData;
+
+      // Validate required fields
+      if (!senderId || !receiverId || typeof content !== 'string') {
+        console.error('Invalid message data:', { senderId, receiverId, content });
+        return socket.emit('error', { message: 'Invalid message data: senderId, receiverId, and content are required' });
+      }
+
+      // Verify sender is the authenticated user
+      if (socket.userId !== senderId) {
+        console.error('Unauthorized message attempt:', { socketUserId: socket.userId, senderId });
+        return socket.emit('error', { message: 'Unauthorized: Cannot send message as another user' });
+      }
 
       console.log(`Socket message: ${senderId} -> ${receiverId}: ${content}`);
 
@@ -199,15 +229,33 @@ io.on("connection", (socket) => {
       console.log(`Message saved and sent from ${senderId} to ${receiverId} with ID ${newMessage._id}`);
     } catch (error) {
       console.error("Error handling socket message:", error);
+      socket.emit('error', { message: 'Failed to send message' });
     }
   });
 
   // Handle typing indicator
   socket.on("typing", (data) => {
-    socket.to(data.receiverId).emit("typing_indicator", {
-      senderId: data.senderId,
-      isTyping: data.isTyping
-    });
+    try {
+      // Validate required fields
+      if (!data.senderId || !data.receiverId || typeof data.isTyping !== 'boolean') {
+        console.error('Invalid typing data:', data);
+        return socket.emit('error', { message: 'Invalid typing data: senderId, receiverId, and isTyping are required' });
+      }
+
+      // Verify sender is the authenticated user
+      if (socket.userId !== data.senderId) {
+        console.error('Unauthorized typing attempt:', { socketUserId: socket.userId, senderId: data.senderId });
+        return socket.emit('error', { message: 'Unauthorized: Cannot send typing indicator as another user' });
+      }
+
+      socket.to(data.receiverId).emit("typing_indicator", {
+        senderId: data.senderId,
+        isTyping: data.isTyping
+      });
+    } catch (error) {
+      console.error('Error handling typing indicator:', error);
+      socket.emit('error', { message: 'Failed to send typing indicator' });
+    }
   });
   // Get unread count (for Sidebar)
   socket.on('get-unread-count', async () => {
@@ -361,22 +409,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Get unread count
-  socket.on('get-unread-count', async () => {
-    try {
-      const unreadCount = await notificationmodel.countDocuments({
-        user: socket.userId,
-        isRead: false
-      });
-
-      socket.emit('unread-count-response', {
-        userId: socket.userId,
-        count: unreadCount
-      });
-    } catch (error) {
-      console.error('Error getting unread count via socket:', error);
-    }
-  });
+  
 
   // Handle disconnect
   socket.on("disconnect", () => {
@@ -407,7 +440,14 @@ app.get('/health', (req, res) => {
 
 // Handle file uploads
 app.post('/api/upload', (req, res) => {
-  upload.single('avatar')(req, res, function (err) {
+  // Handle different field names for different types of uploads
+  const uploadMiddleware = upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'postMedia', maxCount: 1 },
+    { name: 'storyMedia', maxCount: 1 }
+  ]);
+  
+  uploadMiddleware(req, res, function (err) {
     if (err) {
       console.error('Multer error:', err);
       // Handle Multer errors properly
@@ -424,8 +464,15 @@ app.post('/api/upload', (req, res) => {
       }
     }
 
+    // Look for uploaded file in any of the expected fields
+    let uploadedFile = null;
+    if (req.files && Object.keys(req.files).length > 0) {
+      const fieldName = Object.keys(req.files)[0];
+      uploadedFile = req.files[fieldName][0];
+    }
+    
     // If no file was uploaded
-    if (!req.file) {
+    if (!uploadedFile) {
       return res.status(400).json({
         message: 'No file uploaded',
         success: false
@@ -433,14 +480,14 @@ app.post('/api/upload', (req, res) => {
     }
 
     // Return the file path that can be stored in the database
-    const filePath = `/uploads/${req.file.filename}`;
+    const filePath = `/uploads/${uploadedFile.filename}`;
     return res.status(200).json({
       message: 'File uploaded successfully',
       success: true,
       filePath: filePath
     });
   });
-})
+});
 
 // Endpoint to update user avatar specifically
 app.patch('/api/user/:id/avatar', (req, res) => {
@@ -509,10 +556,26 @@ server.listen(PORT, (error) => {
 // Handle server shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
+  
+  // Set timeout to force exit after 10 seconds
+  const timeout = setTimeout(() => {
+    console.error('Force exit due to timeout during graceful shutdown');
+    process.exit(1);
+  }, 10000);
+  
+  server.close((err) => {
+    clearTimeout(timeout);
+    if (err) {
+      console.error('Error closing HTTP server:', err);
+      process.exit(1);
+    }
     console.log('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed');
+    mongoose.connection.close(false, (closeErr) => {
+      if (closeErr) {
+        console.error('Error closing MongoDB connection:', closeErr);
+      } else {
+        console.log('MongoDB connection closed');
+      }
       process.exit(0);
     });
   });
@@ -520,10 +583,26 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
+  
+  // Set timeout to force exit after 10 seconds
+  const timeout = setTimeout(() => {
+    console.error('Force exit due to timeout during graceful shutdown');
+    process.exit(1);
+  }, 10000);
+  
+  server.close((err) => {
+    clearTimeout(timeout);
+    if (err) {
+      console.error('Error closing HTTP server:', err);
+      process.exit(1);
+    }
     console.log('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed');
+    mongoose.connection.close(false, (closeErr) => {
+      if (closeErr) {
+        console.error('Error closing MongoDB connection:', closeErr);
+      } else {
+        console.log('MongoDB connection closed');
+      }
       process.exit(0);
     });
   });

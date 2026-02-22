@@ -47,6 +47,15 @@ const poststruct = mongoose.Schema({
     scheduledPostId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ScheduledPost'
+    },
+    // Aspect ratio for better display
+    aspectRatio: {
+        type: String,
+        default: '4:5'
+    },
+    // Duration for video posts
+    duration: {
+        type: Number
     }
 })
 

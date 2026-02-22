@@ -23,6 +23,7 @@ const FollowStatusBadge = ({
     } else if (userId === targetUserId) {
       setFollowStatus('self');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, targetUserId]);
 
   const checkFollowStatus = async () => {
