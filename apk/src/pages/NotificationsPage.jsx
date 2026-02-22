@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, User, Heart, MessageCircle, X, Check } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
 import API from '../utils/api';
 import '../styles/Notifications.css';
 
@@ -121,89 +122,104 @@ const NotificationsPage = () => {
 
   if (loading) {
     return (
-      <div className="notifications-page">
-        <div className="loading">Loading notifications...</div>
+      <div className="app-container">
+        <Sidebar />
+        <div className="notifications-page">
+          <div className="notifications-container">
+            <div className="loading">Loading notifications...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="notifications-page">
-        <div className="error">{error}</div>
+      <div className="app-container">
+        <Sidebar />
+        <div className="notifications-page">
+          <div className="notifications-container">
+            <div className="error">{error}</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="notifications-page">
-      {/* Header */}
-      <div className="notifications-header">
-        <div className="header-content">
-          <h1>Notifications</h1>
-          {unreadCount > 0 && (
-            <div className="unread-badge">{unreadCount}</div>
-          )}
-        </div>
-        
-        {unreadCount > 0 && (
-          <button 
-            className="mark-all-read"
-            onClick={handleMarkAllAsRead}
-          >
-            <Check size={16} />
-            Mark all as read
-          </button>
-        )}
-      </div>
-
-      {/* Notifications List */}
-      <div className="notifications-list">
-        {notifications.length === 0 ? (
-          <div className="no-notifications">
-            <Bell size={48} />
-            <h3>No Notifications</h3>
-            <p>You're all caught up!</p>
-          </div>
-        ) : (
-          notifications.map(notification => (
-            <div 
-              key={notification._id} 
-              className={`notification-item ${notification.isRead ? 'read' : 'unread'}`}
-            >
-              <div className="notification-icon">
-                {getNotificationIcon(notification.type)}
-              </div>
-              
-              <div className="notification-content">
-                <p className="notification-message">
-                  {getNotificationMessage(notification)}
-                </p>
-                <p className="notification-time">
-                  {new Date(notification.date).toLocaleDateString()}
-                </p>
-              </div>
-              
-              <div className="notification-actions">
-                {!notification.isRead && (
-                  <button 
-                    className="mark-read-button"
-                    onClick={() => handleMarkAsRead(notification._id)}
-                  >
-                    <Check size={16} />
-                  </button>
-                )}
-                
-                <button 
-                  className="delete-button"
-                  onClick={() => handleDeleteNotification(notification._id)}
-                >
-                  <X size={16} />
-                </button>
-              </div>
+    <div className="app-container">
+      <Sidebar />
+      <div className="notifications-page">
+        <div className="notifications-container">
+          {/* Header */}
+          <div className="notifications-header">
+            <div className="header-content">
+              <h1>Notifications</h1>
+              {unreadCount > 0 && (
+                <div className="unread-badge">{unreadCount}</div>
+              )}
             </div>
-          ))
-        )}
+            
+            {unreadCount > 0 && (
+              <button 
+                className="mark-all-read"
+                onClick={handleMarkAllAsRead}
+              >
+                <Check size={16} />
+                Mark all as read
+              </button>
+            )}
+          </div>
+
+          {/* Notifications List */}
+          <div className="notifications-list">
+            {notifications.length === 0 ? (
+              <div className="no-notifications">
+                <Bell size={48} />
+                <h3>No Notifications</h3>
+                <p>You're all caught up!</p>
+              </div>
+            ) : (
+              notifications.map(notification => (
+                <div 
+                  key={notification._id} 
+                  className={`notification-item ${notification.isRead ? 'read' : 'unread'}`}
+                >
+                  <div className="notification-icon">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  
+                  <div className="notification-content">
+                    <p className="notification-message">
+                      {getNotificationMessage(notification)}
+                    </p>
+                    <p className="notification-time">
+                      {new Date(notification.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  
+                  <div className="notification-actions">
+                    {!notification.isRead && (
+                      <button 
+                        className="mark-read-button"
+                        onClick={() => handleMarkAsRead(notification._id)}
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
+                    
+                    <button 
+                      className="delete-button"
+                      onClick={() => handleDeleteNotification(notification._id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

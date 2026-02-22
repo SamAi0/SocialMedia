@@ -4,6 +4,37 @@
   color: var(--text-primary);
 }
 
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 72px;
+  transition: margin-left 0.3s ease;
+  background-color: var(--bg-secondary);
+}
+
+.sidebar.expanded + .main-content {
+  margin-left: 240px;
+}
+
+/* For pages that use the new layout structure */
+.notifications-page, .messaging-page {
+  flex: 1;
+  margin-left: 72px;
+  transition: margin-left 0.3s ease;
+  background-color: var(--bg-secondary);
+  max-width: calc(100% - 72px);
+}
+
+.sidebar.expanded ~ .notifications-page,
+.sidebar.expanded ~ .messaging-page {
+  margin-left: 240px;
+  max-width: calc(100% - 240px);
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -12,6 +43,24 @@
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content,
+  .notifications-page,
+  .messaging-page {
+    margin-left: 0;
+    max-width: 100%;
+  }
+  
+  .sidebar {
+    width: 72px;
+  }
+  
+  .sidebar.expanded {
+    width: 72px;
   }
 }
 

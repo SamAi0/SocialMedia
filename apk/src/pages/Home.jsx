@@ -224,10 +224,8 @@ function Home() {
 
   // --- FINAL CLEANED RENDER STRUCTURE ---
   return (
-    <div className="home-container">
-      {/* 1. Sidebar (Fixed Element - As requested) */}
+    <>
       <Sidebar user={user} />
-
       <main className="main-content">
         <div className="content-container">
             
@@ -338,7 +336,7 @@ function Home() {
           </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }
 

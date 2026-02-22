@@ -14,7 +14,7 @@
   padding: 20px 12px;
 }
 
-.sidebar:hover {
+.sidebar.expanded {
   width: 240px;
 }
 
@@ -40,7 +40,7 @@
   color: var(--text-primary);
 }
 
-.sidebar:hover .logo-text {
+.sidebar.expanded .logo-text {
   display: block;
 }
 
@@ -86,7 +86,7 @@
   color: var(--text-primary);
 }
 
-.sidebar:hover .nav-text {
+.sidebar.expanded .nav-text {
   display: block;
 }
 

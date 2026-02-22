@@ -10,6 +10,7 @@ import SearchPage from './pages/SearchPage';
 import SavedPosts from './pages/SavedPosts';
 import NotificationsPage from './pages/NotificationsPage';
 import FollowsPage from './pages/FollowsPage';
+import MessagingPage from './pages/MessagingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUserManagement from './pages/AdminUserManagement';
 import AdminContentModeration from './pages/AdminContentModeration';
@@ -39,7 +40,9 @@ function App() {
               path="/" 
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <div className="app-container">
+                    <Home />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -47,7 +50,9 @@ function App() {
               path="/profile/:userId" 
               element={
                 <ProtectedRoute>
-                  <ProfilePage />
+                  <div className="app-container">
+                    <ProfilePage />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -55,7 +60,9 @@ function App() {
               path="/post/:postId" 
               element={
                 <ProtectedRoute>
-                  <PostPage />
+                  <div className="app-container">
+                    <PostPage />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -63,7 +70,9 @@ function App() {
               path="/create" 
               element={
                 <ProtectedRoute>
-                  <CreatePostPage />
+                  <div className="app-container">
+                    <CreatePostPage />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -71,7 +80,9 @@ function App() {
               path="/search" 
               element={
                 <ProtectedRoute>
-                  <SearchPage />
+                  <div className="app-container">
+                    <SearchPage />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -79,7 +90,9 @@ function App() {
               path="/saved" 
               element={
                 <ProtectedRoute>
-                  <SavedPosts />
+                  <div className="app-container">
+                    <SavedPosts />
+                  </div>
                 </ProtectedRoute>
               } 
             />
@@ -95,7 +108,17 @@ function App() {
               path="/follows" 
               element={
                 <ProtectedRoute>
-                  <FollowsPage />
+                  <div className="app-container">
+                    <FollowsPage />
+                  </div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/messages" 
+              element={
+                <ProtectedRoute>
+                  <MessagingPage />
                 </ProtectedRoute>
               } 
             />

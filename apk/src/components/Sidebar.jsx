@@ -13,6 +13,7 @@ const Sidebar = ({ user: propUser }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -266,9 +267,25 @@ const Sidebar = ({ user: propUser }) => {
     setShowCreateModal(false);
   };
 
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+  };
+
   return (
     <>
-      <div className="sidebar">
+      <div 
+        className={`sidebar ${isExpanded ? 'expanded' : ''}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <div className="sidebar-logo">
           <Instagram className="logo-icon" />
           <span className="logo-text">Rizzit</span>
